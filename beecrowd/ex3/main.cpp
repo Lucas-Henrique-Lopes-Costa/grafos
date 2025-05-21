@@ -2,58 +2,57 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <set>
 
 using namespace std;
 
 typedef pair<int, int> ii;
 typedef vector<ii> vii;
 
-int dijkstra(int n, int s, int t, int c, vector<vii> &adj)
+int bfs_maior_pedagio(int n, int s, int t, int c, vector<vii> &adj)
 {
-  vector<pair<int, int>> dist(n + 1, {1e9, 0});
-  dist[s] = {0, 0};
+  queue<pair<pair<int, int>, int>> fila;
+  fila.push({{s, 0}, 0});
 
-  priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-  pq.push({0, s});
+  set<pair<int, int>> visitados;
 
-  while (!pq.empty())
+  int maior_pedagio_encontrado = -1;
+
+  while (!fila.empty())
   {
-    int d = pq.top().first;
-    int u = pq.top().second;
-    pq.pop();
+    int no_atual = fila.front().first.first;
+    int custo_atual = fila.front().first.second;
+    int maior_pedagio_atual = fila.front().second;
+    fila.pop();
 
-    if (d > dist[u].first)
+    if (no_atual == t)
+    {
+      maior_pedagio_encontrado = max(maior_pedagio_encontrado, maior_pedagio_atual);
+      continue;
+    }
+
+    pair<int, int> estado = {no_atual, maior_pedagio_atual};
+    if (visitados.count(estado))
       continue;
 
-    for (auto &edge : adj[u])
+    visitados.insert(estado);
+
+    for (auto &edge : adj[no_atual])
     {
-      int v = edge.first;
-      int weight = edge.second;
+      int vizinho = edge.first;
+      int pedagio = edge.second;
 
-      int new_cost = dist[u].first + weight;
-      int new_max_toll = max(dist[u].second, weight);
+      int novo_custo_total = custo_atual + pedagio;
 
-      if (new_cost <= c && new_cost < dist[v].first)
+      if (novo_custo_total <= c)
       {
-        dist[v].first = new_cost;
-        dist[v].second = new_max_toll;
-        pq.push({new_cost, v});
-      }
-      else if (new_cost <= c && new_cost == dist[v].first && new_max_toll > dist[v].second)
-      {
-        dist[v].second = new_max_toll;
+        int novo_maior_pedagio = max(maior_pedagio_atual, pedagio);
+        fila.push({{vizinho, novo_custo_total}, novo_maior_pedagio});
       }
     }
   }
 
-  if (dist[t].first == 1e9)
-  {
-    return -1;
-  }
-  else
-  {
-    return dist[t].second;
-  }
+  return maior_pedagio_encontrado;
 }
 
 int solve()
@@ -69,7 +68,7 @@ int solve()
     adj[u].emplace_back(v, w);
   }
 
-  return dijkstra(n, s, t, c, adj);
+  return bfs_maior_pedagio(n, s, t, c, adj);
 }
 
 int main()
