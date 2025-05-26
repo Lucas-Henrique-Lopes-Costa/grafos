@@ -1,3 +1,9 @@
+/*
+Alunos:
+Lucas Henrique Lopes Costa - 202310205
+Pedro Gonçalves Costa Melo - 202310207
+*/
+
 #include <iostream>
 #include <vector>
 #include <queue>
